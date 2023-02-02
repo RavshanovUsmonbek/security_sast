@@ -20,13 +20,6 @@ from sqlalchemy import Column, Integer, String, ARRAY, JSON, DateTime, and_
 from sqlalchemy.sql import func
 
 from tools import rpc_tools, db, db_tools, constants, secrets_tools
-
-# from ...shared.utils.rpc import RpcMixin
-# from ...shared.db_manager import Base
-# from ...shared.models.abstract_base import AbstractBaseMixin
-# from ...shared.constants import CURRENT_RELEASE
-# from ...projects.connectors.secrets import get_project_hidden_secrets, unsecret
-
 from pylon.core.tools import log  # pylint: disable=E0611,E0401
 
 

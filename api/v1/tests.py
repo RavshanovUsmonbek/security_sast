@@ -97,22 +97,22 @@ class API(Resource):
 
         test.handle_change_schedules(schedules)
 
-        threshold = SecurityThresholds(
-            project_id=test.project_id,
-            test_name=test.name,
-            test_uid=test.test_uid,
-            critical=-1,
-            high=-1,
-            medium=-1,
-            low=-1,
-            info=-1,
-            critical_life=-1,
-            high_life=-1,
-            medium_life=-1,
-            low_life=-1,
-            info_life=-1
-        )
-        threshold.insert()
+        # threshold = SecurityThresholds(
+        #     project_id=test.project_id,
+        #     test_name=test.name,
+        #     test_uid=test.test_uid,
+        #     critical=-1,
+        #     high=-1,
+        #     medium=-1,
+        #     low=-1,
+        #     info=-1,
+        #     critical_life=-1,
+        #     high_life=-1,
+        #     medium_life=-1,
+        #     low_life=-1,
+        #     info_life=-1
+        # )
+        # threshold.insert()
 
         if run_test_:
             resp = run_test(test)
