@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import make_response, request
 from flask_restful import Resource
+from pylon.core.tools import log  # pylint: disable=E0611,E0401
 
 from ...models.results import SecurityResultsSAST
 
@@ -26,18 +27,11 @@ class API(Resource):
         self.module.context.rpc_manager.call.project_get_or_404(project_id)
 
         # TODO move sast/dast quota checks to a new endpoint, which will be triggered before the scan
-        if args["scan_type"].lower() == 'sast':
-            if not self.module.context.rpc_manager.call.project_check_quota(project_id, 'sast_scans'):
-                return make_response(
-                    {"Forbidden": "The number of sast scans allowed in the project has been exceeded"},
-                    400
-                )
-        elif args["scan_type"].lower() == 'dast':
-            if not self.module.context.rpc_manager.call.project_check_quota(project_id, 'dast_scans'):
-                return make_response(
-                    {"Forbidden": "The number of dast scans allowed in the project has been exceeded"},
-                    400
-                )
+        if not self.module.context.rpc_manager.call.project_check_quota(project_id, 'sast_scans'):
+            return make_response(
+                {"Forbidden": "The number of sast scans allowed in the project has been exceeded"},
+                400
+            )
 
         # security results getter
         report = SecurityResultsSAST.query.filter(

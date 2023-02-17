@@ -54,7 +54,7 @@ const TestProgress = {
     },
     methods: {
         async poll_updates() {
-            const response = await fetch(`/api/v1/security/result/${this.project_id}/${this.test_id}`)
+            const response = await fetch(`/api/v1/security_sast/result/${this.project_id}/${this.test_id}`)
             const {test_status: {status, percentage, description}} = await response.json()
             this.status = status
             this.percentage = percentage

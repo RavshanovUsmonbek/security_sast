@@ -6,17 +6,24 @@ var tableFormatters = {
         switch (value.toLowerCase()) {
             case 'error':
             case 'failed':
-                return `<div style="color: var(--red)">${value} <i class="fas fa-exclamation-circle error"></i></div>`
+                return `<div style="color: var(--red)"><i class="fas fa-exclamation-circle error"></i> ${value}</div>`
             case 'stopped':
-                return `<div style="color: var(--yellow)">${value} <i class="fas fa-exclamation-triangle"></i></div>`
+                return `<div style="color: var(--yellow)"><i class="fas fa-exclamation-triangle"></i> ${value}</div>`
             case 'aborted':
-                return `<div style="color: var(--gray)">${value} <i class="fas fa-times-circle"></i></div>`
+                return `<div style="color: var(--gray)"><i class="fas fa-times-circle"></i> ${value}</div>`
             case 'finished':
-                return `<div style="color: var(--info)">${value} <i class="fas fa-check-circle"></i></div>`
+                return `<div style="color: var(--info)"><i class="fas fa-check-circle"></i> ${value}</div>`
             case 'passed':
-                return `<div style="color: var(--green)">${value} <i class="fas fa-check-circle"></i></div>`
+                return `<div style="color: var(--green)"><i class="fas fa-check-circle"></i> ${value}</div>`
+            case 'preparing':
+            case 'scanning started':
+            case 'scanning finished':
+            case 'processing started':
+            case 'processing finished':
+            case 'reporting started':
+            case 'reporting finished': 
             case 'pending...':
-                return `<div style="color: var(--basic)">${value} <i class="fas fa-spinner fa-spin fa-secondary"></i></div>`
+                return `<div style="color: var(--basic)"><i class="fas fa-spinner fa-spin fa-secondary"></i> ${value}</div>`
             default:
                 return value
         }
@@ -92,7 +99,7 @@ var tableFormatters = {
         "click #test_settings": function (e, value, row, index) {
             securityModal.setData(row)
             securityModal.container.modal('show')
-            $('#modal_title').text('Edit Application Test')
+            $('#modal_title').text('Edit Code Test')
             $('#security_test_save').text('Update')
             $('#security_test_save_and_run').text('Update And Start')
 
@@ -119,8 +126,9 @@ var apiActions = {
             method: 'DELETE'
         }).then(response => response.ok && apiActions.afterSave())
     },
-    edit: (testUID, data) => {
+    edit: async (testUID, data) => {
         apiActions.beforeSave()
+        data = await apiActions.setArtifactsIfExists(data, testUID)
         fetch(`${apiActions.base_url('test')}/${testUID}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
@@ -138,8 +146,9 @@ var apiActions = {
         data['run_test'] = true
         return apiActions.edit(testUID, data)
     },
-    create: data => {
+    create: async data => {
         apiActions.beforeSave()
+        data = await apiActions.setArtifactsIfExists(data)
         fetch(apiActions.base_url('tests'), {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -157,11 +166,53 @@ var apiActions = {
         data['run_test'] = true
         return apiActions.create(data)
     },
+    setArtifactsIfExists: async (data, testUID=null) => {
+        if (data['source']['name'] != "artifact"){
+            return data
+        }
+        
+        file = data['source']['file']
+        // testUID is set -> means update operation
+        if (!file && testUID){
+            currenValue = $("#application_tests_table").bootstrapTable("getData", params={useCurrentPage: true}).filter(
+                row => row['test_uid'] == testUID
+            )[0]
+            data['source'] = currenValue['source']
+            return data
+        }
+
+        const fileMeta = await apiActions.uploadFile(file)
+        if (fileMeta == null)
+            return
+ 
+        data['source']['name'] = "artifact"
+        data['source']['file_meta'] = fileMeta
+        data['source']['file'] = fileMeta['filename']
+        return data
+    },
+    uploadFile: async file => {
+        let formData = new FormData();
+        formData.append('file', file)
+        try {
+            const response = await axios.post(apiActions.base_url('files'), formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            data = response['data']
+            return data['item']
+        } catch(err){
+            showNotify("ERROR", "Artifact uploading failed")
+            $("#security_test_save").removeClass("disabled updating")
+            $("#security_test_save_and_run").removeClass("disabled updating")
+            return null
+        }        
+    },
     beforeSave: () => {
         $("#security_test_save").addClass("disabled updating")
         $("#security_test_save_and_run").addClass("disabled updating")
         securityModal.clearErrors()
-        alertCreateTest?.clear()
+        alertCreateCodeTest?.clear()
     },
     afterSave: () => {
         $("#application_tests_table").bootstrapTable('refresh')
@@ -191,4 +242,16 @@ $(document).on('vue_init', () => {
         ids_to_delete && apiActions.results_delete(ids_to_delete)
     })
     $("#application_tests_table").on('all.bs.table', initTooltips)
+
+    socket.on("result_status_updated", data => {
+        result_id = data['result_id']
+        result_status = data['status']
+
+        $('#results_table').bootstrapTable('updateCellByUniqueId', {
+            id: result_id,
+            field: 'test_status.status',
+            value: result_status['status'],
+        })
+
+    })
 })

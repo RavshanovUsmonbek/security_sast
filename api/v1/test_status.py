@@ -18,6 +18,7 @@ class API(Resource):
     ]
     def __init__(self, module):
         self.module = module
+        self.sio = self.module.context.sio
 
     def put(self, project_id: int, test_id: int):
         args = request.json
@@ -36,6 +37,7 @@ class API(Resource):
             )
         test = SecurityResultsSAST.query.filter(_filter).first()
         test.set_test_status(test_status)
+        self.sio.emit("result_status_updated", {"status": test_status, 'result_id': test_id})
 
         if test_status['status'].lower().startswith('finished'):
             test.update_severity_counts()
@@ -53,11 +55,11 @@ def write_test_run_logs_to_minio_bucket(test: SecurityResultsSAST, file_name='lo
     loki_settings_url = urlparse(current_app.config["CONTEXT"].settings.get('loki', {}).get('url'))  # todo: check if self.module.context.config returns the same
     if loki_settings_url:
         #
-        task_key = test.test_id
         result_key = test.id
         project_id = test.project_id
+        build_id = test.build_id
         #
-        logs_query = "{" + f'task_key="{task_key}",result_test_id="{result_key}",project_id="{project_id}"' + "}"
+        logs_query = "{" + f'report_id="{result_key}",project="{project_id}",build_id="{build_id}"' + "}"
         #
         loki_url = urlunparse((
             loki_settings_url.scheme,

@@ -35,20 +35,20 @@
         :borders="true"
 >
     <template #actions="{master}">
-        <div class="d-flex justify-content-end pb-4">
+        <div class="d-flex justify-content-end">
             <ul class="custom-tabs nav nav-pills mr-3 align-content-center"
                 role="tablist"
             >
                 {% for item in ['all', 'valid', 'false positive', 'ignored'] %}
                     <li class="nav-item" role="presentation">
                         <a
-                                class="text-uppercase {% if item == 'all' %}active{% endif %}"
-                                data-toggle="pill"
-                                href="#"
-                                role="tab"
-                                aria-controls="pills-filter"
-                                aria-selected="true"
-                                @click="master.handle_status_filter($event.target.innerText)"
+                            class="text-uppercase {% if item == 'all' %}active{% endif %}"
+                            data-toggle="pill"
+                            href="#"
+                            role="tab"
+                            aria-controls="pills-filter"
+                            aria-selected="true"
+                            @click="master.handle_status_filter($event.target.innerText)"
                         >
                             {{ item }}
                         </a>

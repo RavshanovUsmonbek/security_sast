@@ -43,9 +43,9 @@ const ThresholdModal = {
                 <div class="section">
 
                     <div class="row">
-                        <div class="d-flex flex-column w-100">
+                        <div class="d-flex flex-column w-100 mb-3">
                             <h5 class="pt-2">Test</h5>
-                            <select class="selectpicker bootstrap-select__b mb-3" data-style="btn"
+                            <select class="selectpicker bootstrap-select__b" data-style="btn"
                                 v-model="test"
                                 @change="handle_change_test"
                                 :disabled="mode !== 'create'"
@@ -57,16 +57,16 @@ const ThresholdModal = {
                     </div>
 
                     <div class="row">
-                        <div class="d-flex flex-column w-100">
+                        <div class="d-flex flex-column w-100  mb-3">
                             <h5 class="pt-2">Test context/scope</h5>
-                            <select class="selectpicker bootstrap-select__b mb-3" data-style="btn"
+                            <select class="selectpicker bootstrap-select__b" data-style="btn"
                                 v-model="scope"
                                 @change="handle_change_scope"
                                 :disabled="mode !== 'create'"
                             >
                                 <option v-for="scope in scope_options" :value="scope">[[ scope ]]</option>
                             </select>
-                            <div class="invalid-feedback" style="display: block;">[[ errors.test ]]</div>
+                            <div class="invalid-feedback" style="display: block;">[[ errors.scope ]]</div>
                         </div>
                     </div>
 
@@ -87,6 +87,17 @@ const ThresholdModal = {
         scope_options() {
             this.$nextTick(this.update_pickers)
         },
+        scope(newValue, oldValue){
+            if (!oldValue){
+                delete this.errors['scope']
+            }
+        },
+        test(newValue, oldValue){
+            if (!oldValue){
+                delete this.errors['test']
+            }
+        }
+
     },
     computed: {
         test_parameters() {
@@ -104,7 +115,7 @@ const ThresholdModal = {
                 id: null,
                 mode: 'create',
                 errors: {},
-                is_fetching: false
+                is_fetching: false,
             }
         },
         update_pickers() {
@@ -198,7 +209,19 @@ const ThresholdModal = {
         },
         setError(errors) {
             errors.forEach(i => {
-                this.errors[i.loc[0]] = i.msg
+                if (i.loc[0] == "test_uid" && this.test===null){
+                    this.errors['test'] = "this field is required"
+                    this.errors['scope'] = "this field is required"
+                }
+                else if (i.loc[0] == "test_uid" && this.scope===null){
+                    this.errors['scope'] = "this field is required"
+                }
+                else if (i.loc[0] == "params"){
+                    this.test_parameters.setError(i)
+                }
+                else {
+                    this.errors[i.loc[0]] = i.msg
+                }
             })
         }
     }

@@ -1,7 +1,7 @@
 const updateSummary = async () => {
     // const testId = result_test_id
     const result_test_id = new URLSearchParams(location.search).get('result_id')
-    const response = await fetch(`/api/v1/security/result/${getSelectedProjectId()}/${result_test_id}/`)
+    const response = await fetch(`/api/v1/security_sast/result/${getSelectedProjectId()}/${result_test_id}/`)
     const data = await response.json()
 
     // console.log('New data', data)
@@ -17,7 +17,7 @@ const reRunTest = () => {
     // let search = new URLSearchParams(location.search)
     // const testId = result_test_id
     const result_test_id = new URLSearchParams(location.search).get('result_id')
-    fetch(`/api/v1/security/rerun/${result_test_id}`, {
+    fetch(`/api/v1/security_sast/rerun/${result_test_id}`, {
         method: 'POST'
     }).then(response => {
         if (response.ok) {

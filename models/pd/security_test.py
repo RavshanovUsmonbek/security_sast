@@ -76,7 +76,7 @@ class SecurityTestCommon(BaseModel):
     project_name: str
     test_uid: Optional[str]
     name: str
-    description: Optional[str] = ''
+    description: str
     source: dict
 
     @root_validator

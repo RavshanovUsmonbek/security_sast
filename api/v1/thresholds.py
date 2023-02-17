@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, exc
 from flask import request
 from flask_restful import Resource
 
@@ -48,8 +48,11 @@ class API(Resource):
             pd_obj = ThresholdPD(project_id=project.id, **request.json)
         except ValidationError as e:
             return e.errors(), 400
-        th = SecurityThresholds(**pd_obj.dict())
-        th.insert()
+        try:
+            th = SecurityThresholds(**pd_obj.dict())
+            th.insert()
+        except exc.IntegrityError as e:
+            return {'ok': False, "error": "Threshold for this test already exists"}, 400
         return th.to_json(), 201
 
     def delete(self, project_id: int):

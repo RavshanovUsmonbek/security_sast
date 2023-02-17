@@ -26,7 +26,7 @@
                 </div>
             </div>
             {{ template_slot("alert_bar", payload={
-                "alert_container_id": "alertCreateTest",
+                "alert_container_id": "alertCreateCodeTest",
                 "max_alerts": 2,
                 "overlay_max_width": "1100px"
             }) | safe }}
@@ -73,7 +73,7 @@
                     "hidden_columns": []
                 }) | safe }}
 
-                {{ template_slot("integrations_security_app_content") | safe }}
+                {{ template_slot("integrations_security_sast_content") | safe }}
 
                 {{ template_slot("security_scheduling_test_create_content") | safe }}
             </div>

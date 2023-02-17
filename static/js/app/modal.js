@@ -31,11 +31,16 @@ class SecurityModal {
         this.refreshContainer()
         SecurityModal._instance = this
         this.registerDataProvider(new SectionDataProvider('source', {
-            get: () => SourceCard.Manager('source_card').get(),
-            set: (source) => SourceCard.Manager('source_card').set(source),
+            get: () => {
+                let obj = SourceCard.Manager('source_card').get()
+                return obj
+            },
+            set: source => {
+                return SourceCard.Manager('source_card').set(source)
+            },
             clear: () => SourceCard.Manager('source_card').clear(),
-            setError: (value) => SourceCard.Manager('source_card').setError(value),
-            clearError: () => SourceCard.Manager('source_card').clearErrors()
+            setError: value => SourceCard.Manager('source_card').setError(value),
+            clearErrors: () => SourceCard.Manager('source_card').clearErrors()
         }))
         this.registerDataProvider(new SectionDataProvider('name', {
             get: () => $('#test_name').val(),
@@ -48,6 +53,8 @@ class SecurityModal {
             get: () => $('#test_description').val(),
             set: value => $('#test_description').val(value),
             clear: () => $('#test_description').val(''),
+            setError: data => $('#test_description').addClass('is-invalid').next('div.invalid-feedback').text(data.msg),
+            clearErrors: () => $('#test_description').removeClass('is-invalid')
         }))
         this.registerDataProvider(new SectionDataProvider('test_parameters', {
             get: () => $('#security_test_params').bootstrapTable('getData'),
@@ -95,8 +102,8 @@ class SecurityModal {
             clearErrors: () => $('#security_test_params').removeClass('is-invalid')
         }))
         this.registerDataProvider(new SectionDataProvider('alert_bar', {
-            clear: () => alertCreateTest?.clear(),
-            setError: data => alertCreateTest?.add(data.msg, 'dark-overlay', true)
+            clear: () => alertCreateCodeTest?.clear(),
+            setError: data => alertCreateCodeTest?.add(data.msg, 'dark-overlay', true)
         }))
     }
 
@@ -123,7 +130,7 @@ class SecurityModal {
         Object.keys(this.dataModel).forEach(item => {
             this.dataModel[item].clear()
         })
-        $('#modal_title').text('Add Application Test')
+        $('#modal_title').text('Add Code Test')
         $('#security_test_save').text('Save')
         $('#security_test_save_and_run').text('Save And Start')
         this.test_uid = null
@@ -141,15 +148,12 @@ class SecurityModal {
         errorData?.forEach(item => {
             const [errLoc, ...rest] = item.loc
             item.loc = rest
-            this.dataModel[errLoc]?.setError(item)
+            this.dataModel[errLoc]?.setError([item])
         })
-        alertCreateTest?.add('Please fix errors below', 'danger', true, 5000)
+        alertCreateCodeTest?.add('Please fix errors below', 'danger', true, 5000)
     }
 
     clearErrors = () => {
-        // this.container.find('input.is-invalid').removeClass('is-invalid')
-        // this.container.find('.invalid-feedback').text('')
-        // this.container.find('.invalid-tooltip').text('')
         Object.keys(this.dataModel).forEach(item => this.dataModel[item].clearErrors())
     }
 

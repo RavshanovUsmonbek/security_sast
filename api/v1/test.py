@@ -52,5 +52,7 @@ class API(Resource):
         test = SecurityTestsSAST.query.filter(
             SecurityTestsSAST.get_api_filter(project_id, test_id)
         ).first()
+        if not test:
+            return {"ok": False, "error": "Test is not found"}, 404
         resp = run_test(test, config_only=request.json.get('type', False))
         return resp, resp.get('code', 200)

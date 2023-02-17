@@ -7,6 +7,7 @@ from sqlalchemy import and_, or_, asc
 from ...models.reports import SecurityReport
 from ...models.details import SecurityDetails
 from ...models.results import SecurityResultsSAST
+from pylon.core.tools import log  # pylint: disable=E0611,E0401
 
 
 class API(Resource):
@@ -86,6 +87,7 @@ class API(Resource):
 
     def post(self, project_id: int, *args, **kvargs):
         finding_db = None
+        log.info(request.json)
         for finding in request.json:
             md5 = hashlib.md5(finding["details"].encode("utf-8")).hexdigest()
             hash_id = SecurityDetails.query.filter(

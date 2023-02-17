@@ -7,7 +7,7 @@ from pylon.core.tools import log
 
 from .models.tests import SecurityTestsSAST
 from .models.results import SecurityResultsSAST
-
+from uuid import uuid4
 from tools import rpc_tools, task_tools
 
 
@@ -18,12 +18,14 @@ def run_test(test: SecurityTestsSAST, config_only=False) -> dict:
         project_id=test.project_id,
         test_id=test.id,
         test_uid=test.test_uid,
+        build_id=f'build_{uuid4()}',
         test_name=test.name,
         engagement=engagement_id
     )
     results.insert()
 
     test.results_test_id = results.id
+    test.build_id = results.build_id
     test.commit()
 
     event = [test.configure_execution_json("cc")]

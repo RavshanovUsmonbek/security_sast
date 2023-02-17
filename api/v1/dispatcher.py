@@ -7,6 +7,7 @@ from sqlalchemy import and_
 from ...models.tests import SecurityTestsSAST
 from ...models.thresholds import SecurityThresholds
 from flask import request, make_response
+from pylon.core.tools import log  # pylint: disable=E0611,E0401
 
 
 class API(Resource):
@@ -25,7 +26,7 @@ class API(Resource):
         test_type = seed.split("_")[0]
         test_id = seed.split("_")[1]
 
-        if test_type == "dast":
+        if test_type == "sast":
             _filter = and_(
                 SecurityTestsSAST.project_id == project.id,
                 SecurityTestsSAST.test_uid == test_id
@@ -37,6 +38,8 @@ class API(Resource):
                 ).first().to_json(
                     exclude_fields=("id", "project_id", "test_name", "test_uid")
                 )
+                log.info(thresholds)
+                thresholds = thresholds['params']
             except AttributeError:
                 thresholds = {}
             return test.configure_execution_json(args.get("type"), thresholds=thresholds)
