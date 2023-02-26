@@ -1,11 +1,3 @@
-// const updateStatus = async () => {
-
-// }
-//
-// $(document).ready(() => {
-
-// })
-
 const TestProgress = {
     delimiters: ['[[', ']]'],
     props: ['test_status', 'project_id', 'test_id'],

@@ -212,7 +212,7 @@ var apiActions = {
         $("#security_test_save").addClass("disabled updating")
         $("#security_test_save_and_run").addClass("disabled updating")
         securityModal.clearErrors()
-        alertCreateCodeTest?.clear()
+        alertCreateTest?.clear()
     },
     afterSave: () => {
         $("#application_tests_table").bootstrapTable('refresh')
@@ -229,28 +229,31 @@ var apiActions = {
 }
 
 $(document).on('vue_init', () => {
+
     $('#delete_test').on('click', e => {
         const ids_to_delete = $(e.target).closest('.card').find('table.table').bootstrapTable('getSelections').map(
             item => item.id
         ).join(',')
         ids_to_delete && apiActions.delete(ids_to_delete)
     })
+
     $('#delete_results').on('click', e => {
         const ids_to_delete = vueVm.registered_components.table_results?.table_action('getSelections').map(
             item => item.id
         ).join(',')
         ids_to_delete && apiActions.results_delete(ids_to_delete)
     })
+
     $("#application_tests_table").on('all.bs.table', initTooltips)
 
     socket.on("result_status_updated", data => {
         result_id = data['result_id']
         result_status = data['status']
-
-        $('#results_table').bootstrapTable('updateCellByUniqueId', {
+        $('#results_table').bootstrapTable('updateByUniqueId', {
             id: result_id,
-            field: 'test_status.status',
-            value: result_status['status'],
+            row: {
+                'test_status.status': result_status['status']
+            }
         })
 
     })

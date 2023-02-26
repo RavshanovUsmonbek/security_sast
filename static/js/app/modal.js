@@ -78,7 +78,7 @@ class SecurityModal {
                 console.debug('CLEAR test_parameters')
                 const table_data = [
                     {
-                        default: '',
+                        default: 'Carrier default config',
                         description: "Data",
                         name: "Scan location",
                         type: "String",
@@ -102,8 +102,8 @@ class SecurityModal {
             clearErrors: () => $('#security_test_params').removeClass('is-invalid')
         }))
         this.registerDataProvider(new SectionDataProvider('alert_bar', {
-            clear: () => alertCreateCodeTest?.clear(),
-            setError: data => alertCreateCodeTest?.add(data.msg, 'dark-overlay', true)
+            clear: () => alertCreateTest?.clear(),
+            setError: data => alertCreateTest?.add(data.msg, 'dark-overlay', true)
         }))
     }
 
@@ -150,7 +150,7 @@ class SecurityModal {
             item.loc = rest
             this.dataModel[errLoc]?.setError([item])
         })
-        alertCreateCodeTest?.add('Please fix errors below', 'danger', true, 5000)
+        alertCreateTest?.add('Please fix errors below', 'danger', true, 5000)
     }
 
     clearErrors = () => {

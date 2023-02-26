@@ -102,7 +102,10 @@ class SecurityTestsSAST(db_tools.AbstractBaseMixin, db.Base, rpc_tools.RpcMixin)
                         actions_config["git_clone"]["password"] = secrets_tools.unsecret(self.source.get("password"), project_id=self.project_id)
 
                 if self.source.get("name") == "git_ssh":
-                    actions_config["git_clone"]["key_data"] = secrets_tools.unsecret(self.source.get("private_key"), project_id=self.project_id)
+                    secret_value = secrets_tools.unsecret(self.source.get("private_key"), project_id=self.project_id)
+                    actions_config["git_clone"]["key_data"] = secret_value.replace("\n", "|")
+                    actions_config["git_clone"]["password"] = secrets_tools.unsecret(self.source.get("password"), project_id=self.project_id)
+
 
             if self.source.get("name") == "artifact":
                 actions_config = {
@@ -172,23 +175,6 @@ class SecurityTestsSAST(db_tools.AbstractBaseMixin, db.Base, rpc_tools.RpcMixin)
             processing_config["quality_gate_sast"] = {
                 "thresholds": tholds
             }
-
-            # # SCANNERS
-            # #
-            # scanners_config = dict()
-            # scanners_config[self.sast_settings.get("language")] = {
-            #     "code": "/tmp/code"
-            # }
-            # if "composition" in self.sast_settings.get("options_checked", list()):
-            #     scanners_config["dependencycheck"] = {
-            #         "comp_path": "/tmp/code",
-            #         "comp_opts": "--enableExperimental"
-            #     }
-            # if "secretscan" in self.sast_settings.get("options_checked", list()):
-            #     scanners_config["gitleaks"] = {
-            #         "code": "/tmp/code"
-            #     }
-            
         
             #
             # Reporters

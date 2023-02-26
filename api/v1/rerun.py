@@ -7,7 +7,7 @@ from ...utils import run_test
 
 class API(Resource):
     url_params = [
-        '<int:security_results_dast_id>',
+        '<int:security_results_sast_id>',
     ]
 
     def __init__(self, module):
@@ -29,12 +29,10 @@ class API(Resource):
                 test_uid=test_config['test_uid'],
                 name=test_config['name'],
                 description=test_config['description'],
-
                 urls_to_scan=test_config['urls_to_scan'],
                 urls_exclusions=test_config['urls_exclusions'],
                 scan_location=test_config['scan_location'],
                 test_parameters=test_config['test_parameters'],
-
                 integrations=test_config['integrations'],
             )
             test.insert()
