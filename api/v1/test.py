@@ -29,12 +29,9 @@ class API(Resource):
 
         if errors:
             return errors, 400
-            # return make_response(json.dumps(errors, default=lambda o: o.dict()), 400)
 
         test_query = SecurityTestsSAST.query.filter(SecurityTestsSAST.get_api_filter(project_id, test_id))
-
         schedules = test_data.pop('scheduling', [])
-
         test_query.update(test_data)
         SecurityTestsSAST.commit()
         test = test_query.one()

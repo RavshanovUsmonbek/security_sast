@@ -111,6 +111,48 @@ var tableFormatters = {
     }
 }
 
+var artifactActions = {
+    base_url: (plugin, api_name) => `/api/v1/${plugin}/${api_name}/${getSelectedProjectId()}`,
+    deleteFile: async (bucketName, filename, errorHandler=()=>{}) => {
+        try {
+            url = artifactActions.base_url('artifacts', 'artifact') + `/${bucketName}/${filename}`
+            await axios.delete(url)
+        } catch (err) {
+            errorHandler()          
+        }
+    },
+    deleteBucket: async (bucketName, errorHandler=()=>{}) => {
+        try{
+            url = artifactActions.base_url('artifacts', 'buckets')
+            await axios.delete(url, {
+                params: {
+                    'name': bucketName 
+                }
+            })
+        }catch(err){
+            errorHandler()
+        }
+    },
+    uploadFile: async (file, bucketName=null, errorHandler=()=>{}) => {
+        let formData = new FormData();
+        formData.append('file', file)
+        try {
+            const response = await axios.post(`${artifactActions.base_url('security_sast', 'files')}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                params: {
+                    bucket: bucketName
+                }
+            })
+            data = response['data']
+            return data['item']
+        } catch(err){
+            errorHandler()
+        }        
+    },
+}
+
 var apiActions = {
     base_url: api_name => `/api/v1/security_sast/${api_name}/${getSelectedProjectId()}`,
     run: (id, name) => {
@@ -128,7 +170,7 @@ var apiActions = {
     },
     edit: async (testUID, data) => {
         apiActions.beforeSave()
-        data = await apiActions.setArtifactsIfExists(data, testUID)
+        data = await apiActions.handleFileUploading(data, testUID)
         fetch(`${apiActions.base_url('test')}/${testUID}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
@@ -148,7 +190,7 @@ var apiActions = {
     },
     create: async data => {
         apiActions.beforeSave()
-        data = await apiActions.setArtifactsIfExists(data)
+        data = await apiActions.handleFileUploading(data)
         fetch(apiActions.base_url('tests'), {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -166,22 +208,57 @@ var apiActions = {
         data['run_test'] = true
         return apiActions.create(data)
     },
-    setArtifactsIfExists: async (data, testUID=null) => {
+    currentTestData: testUID => {
+        currentValue = $("#application_tests_table").bootstrapTable("getData", params={useCurrentPage: true}).filter(
+            row => row['test_uid'] == testUID
+        )[0]
+        return currentValue
+    },
+    
+    handleFileUploading: async (data, testUID=null) => {
         if (data['source']['name'] != "artifact"){
+            if (testUID){
+                currentValue = apiActions.currentTestData(testUID)
+                if (currentValue['source']['name'] == "artifact"){
+                    bucket = currentValue['source']['file_meta']['bucket']
+                    artifactActions.deleteBucket(bucket, () => {
+                        showNotify("ERROR", "Artifact uploading failed")
+                        $("#security_test_save").removeClass("disabled updating")
+                        $("#security_test_save_and_run").removeClass("disabled updating")
+                    })
+                }   
+            }
             return data
         }
-        
         file = data['source']['file']
-        // testUID is set -> means update operation
+        // if it is update operation and file is not set
+        // then set current source values
         if (!file && testUID){
-            currenValue = $("#application_tests_table").bootstrapTable("getData", params={useCurrentPage: true}).filter(
-                row => row['test_uid'] == testUID
-            )[0]
-            data['source'] = currenValue['source']
+            currentValue = apiActions.currentTestData(testUID)
+            data['source'] = currentValue['source']
             return data
+        }
+        // if update operation then delete previous artifact
+        bucket = null
+        if (testUID){
+            currentValue = apiActions.currentTestData(testUID)
+            if (currentValue['source']['name'] == "artifact"){
+                bucket = currentValue['source']['file_meta']['bucket']
+                filename = currentValue['source']['file_meta']['filename']
+                artifactActions.deleteFile(bucket, filename, () => {
+                    showNotify("ERROR", "Artifact uploading failed")
+                    $("#security_test_save").removeClass("disabled updating")
+                    $("#security_test_save_and_run").removeClass("disabled updating")
+                })
+            }
         }
 
-        const fileMeta = await apiActions.uploadFile(file)
+        const fileMeta = await artifactActions.uploadFile(file, bucket, () => {
+            showNotify("ERROR", "Artifact uploading failed")
+            $("#security_test_save").removeClass("disabled updating")
+            $("#security_test_save_and_run").removeClass("disabled updating")
+        })
+
         if (fileMeta == null)
             return
  
@@ -189,24 +266,6 @@ var apiActions = {
         data['source']['file_meta'] = fileMeta
         data['source']['file'] = fileMeta['filename']
         return data
-    },
-    uploadFile: async file => {
-        let formData = new FormData();
-        formData.append('file', file)
-        try {
-            const response = await axios.post(apiActions.base_url('files'), formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
-            data = response['data']
-            return data['item']
-        } catch(err){
-            showNotify("ERROR", "Artifact uploading failed")
-            $("#security_test_save").removeClass("disabled updating")
-            $("#security_test_save_and_run").removeClass("disabled updating")
-            return null
-        }        
     },
     beforeSave: () => {
         $("#security_test_save").addClass("disabled updating")

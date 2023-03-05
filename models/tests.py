@@ -15,7 +15,6 @@
 from json import dumps
 from queue import Empty
 from typing import List, Union
-from uuid import uuid4
 from sqlalchemy import Column, Integer, String, ARRAY, JSON, and_
 from tools import rpc_tools, db, db_tools, constants, secrets_tools
 from pylon.core.tools import log  # pylint: disable=E0611,E0401
@@ -126,7 +125,13 @@ class SecurityTestsSAST(db_tools.AbstractBaseMixin, db.Base, rpc_tools.RpcMixin)
                         "delete": False
                     }
                 }
-
+            
+            if self.source.get("name") == "container":
+                actions_config = {
+                    "container_metadata": {
+                        "image_name": self.source.get('image_name'),
+                    }
+                }
             #
             # Scanners
             #
