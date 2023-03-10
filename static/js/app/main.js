@@ -1,4 +1,12 @@
 var tableFormatters = {
+    durationFormatter(value, row, index){
+        return value + 's'
+    },
+
+    date_formatter(value) {
+        return new Date(value).toLocaleString()
+    },
+
     reports_test_name_button(value, row, index) {
         return `<a href="./results?result_id=${row.id}" role="button">${row.name}</a>`
     },

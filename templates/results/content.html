@@ -77,14 +77,6 @@
                                 <tr>
                                     <td class="text-gray-500 font-h6 font-semibold">Started</td>
                                     <td class="font-h5">{{ test_data.start_date }}</td>
-                                <tr>
-                                    <td class="text-gray-500 font-h6 font-semibold">scan type</td>
-                                    <td class="font-h5">{{ test_data.scan_type }}</td>
-                            </table>
-                            <table class="table-card-result">
-                                </tr>
-                                    <td class="text-gray-500 font-h6 font-semibold">valid</td>
-                                    <td class="font-h5" data-updatable-field="valid">{{ test_data.valid }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-gray-500 font-h6 font-semibold">Ended</td>
@@ -93,8 +85,18 @@
                             </table>
                             <table class="table-card-result">
                                 <tr>
+                                    <td class="text-gray-500 font-h6 font-semibold">scan type</td>
+                                    <td class="font-h5">{{ test_data.scan_type }}</td>
+                                </tr>
+                                <tr>
                                     <td class="text-gray-500 font-h6 font-semibold">Environment</td>
                                     <td class="font-h5">{{ test_data['environment'] }}</td>
+                                </tr>
+                            </table>
+                            <table class="table-card-result">
+                                </tr>
+                                    <td class="text-gray-500 font-h6 font-semibold">Valid</td>
+                                    <td class="font-h5" data-updatable-field="valid">{{ test_data.valid }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-gray-500 font-h6 font-semibold">false positives</td>
@@ -103,11 +105,11 @@
                             </table>
                             <table class="table-card-result">
                                 <tr>
-                                    <td class="text-gray-500 font-h6 font-semibold">duration</td>
+                                    <td class="text-gray-500 font-h6 font-semibold">Duration</td>
                                     <td class="font-h5">{{ test_data["scan_duration"] }} s</td>
                                 </tr>
                                 <tr>
-                                    <td class="text-gray-500 font-h6 font-semibold">findings</td>
+                                    <td class="text-gray-500 font-h6 font-semibold">Findings</td>
                                     <td class="font-h5"data-updatable-field="findings">{{ test_data.findings }}</td>
                                 </tr>
                             </table>
@@ -120,20 +122,6 @@
                                     <td class="text-gray-500 font-h6 font-semibold">Scanners</td>
                                     <td class="font-h5">
                                         {{ test_data.test_config['integrations']['scanners'] | join(', ') }}
-                                    </td>
-                                </tr>
-                            </table>
-                            <table class="table-card-result">
-                                <tr>
-                                    <td class="text-gray-500 font-h6 font-semibold">URL</td>
-                                    <td class="font-h5">
-                                        {{ test_data.test_config['urls_to_scan'] | join(', ') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-gray-500 font-h6 font-semibold">tags</td>
-                                    <td class="font-h5">
-                                        {{ test_data.tags | tag_format | safe }}
                                     </td>
                                 </tr>
                             </table>
